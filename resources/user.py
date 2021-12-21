@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Tuple, Union
 from flask_jwt_extended.utils import get_jwt, get_jwt_identity
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
@@ -48,6 +49,8 @@ class User(Resource):
 
     @classmethod
     def put(cls, user_id: int) -> Tuple[Dict, int]:
+        user_json = request.get_json()
+        user_data = user_schema.load(user_json)
         try:
             user = UserModel.find_by_id(user_id)
         except:
@@ -55,6 +58,12 @@ class User(Resource):
 
         if user:
             try:
+                user.user_name = user_data.user_name
+                user.fname = user_data.fname
+                user.lname = user_data.lname
+                user.password = user_data.password
+                user.role = user_data.role
+
                 user.save_to_db()
                 return user_schema.dump(user), 200
             except:
