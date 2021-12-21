@@ -1,0 +1,113 @@
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.bak
+
+
+# Distribution / packaging
+.Python
+.vscode/
+build/
+develop-eggs/
+/dist
+dist/
+.dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# pyenv
+.python-version
+
+# Node Modules
+node_modules
+./node_modules
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env.local
+.env.*.local
+
+
+# Rope project settings
+.ropeproject
+
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.pylintrc
+*.pylintrc
+
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# config files
+config.ini
+*.ini
+
+# misc files
+
+.browserslistrc
+*.log
+
+# Testing scripts
+tester.*
+test.*
+*test.*
+tests.*
+Test.*
+Tests.*
+Tester.*
+Testing.*
