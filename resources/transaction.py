@@ -19,12 +19,13 @@ class NewTransaction(Resource):
     @classmethod
     def post(cls) -> Tuple[Dict, int]:
         transaction_json = request.get_json()
-        transaction: TransactionModel = transaction_schema.load(transaction_json)
 
         try:
+            transaction: TransactionModel = transaction_schema.load(transaction_json)
             transaction.save_to_db()
-        except:
-            return {"message": SERVER_ERROR}, 500
+        except Exception as err:
+            return err
+            # return {"message": SERVER_ERROR}, 500
 
         return transaction_schema.dump(transaction), 201
 
@@ -44,6 +45,8 @@ class Transaction(Resource):
 
     @classmethod
     def put(cls, transaction_id: int) -> Tuple[Dict, int]:
+        json_data = request.get_json()
+        transaction_data = transaction_schema.load(json_data)
         try:
             transaction = TransactionModel.find_by_id(transaction_id)
         except:
@@ -51,6 +54,18 @@ class Transaction(Resource):
 
         if transaction:
             try:
+                transaction.receipt_num = transaction_data.receipt_num
+                transaction.account_id = transaction_data.account_id
+                transaction.customer_name = transaction_data.customer_name
+                transaction.description = transaction_data.description
+                transaction.amount = transaction_data.amount
+                transaction.payment_type = transaction_data.payment_type
+                transaction.utility = transaction_data.utility
+                transaction.service_charge = transaction_data.service_charge
+                transaction.balance_due = transaction_data.balance_due
+                transaction.processor = transaction_data.processor
+                transaction.user_id = transaction_data.user_id
+
                 transaction.save_to_db()
                 return transaction_schema.dump(transaction), 200
             except:
@@ -77,7 +92,7 @@ class Transaction(Resource):
 
 class TransactionList(Resource):
     @classmethod
-    @jwt_required()
+    # @jwt_required()
     def get(cls) -> Tuple[Dict, int]:
         try:
             transactions = TransactionModel.get_all()
@@ -89,7 +104,7 @@ class TransactionList(Resource):
 
 class TransactionSearch(Resource):
     @classmethod
-    @jwt_required()
+    # @jwt_required()
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:
             results = TransactionModel.text_search(term)

@@ -25,7 +25,7 @@ class TransactionModel(db.Model):
     account_id = db.Column(
         db.Integer, db.ForeignKey("customers.account_id"), nullable=False
     )
-    customer_name = db.Column(db.String(65), nullable=False)
+    customer_name = db.Column(db.String(130), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     payment_type = db.Column(db.String(15), nullable=False)

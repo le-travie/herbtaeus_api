@@ -43,13 +43,25 @@ class Customer(Resource):
 
     @classmethod
     def put(cls, account_id: int) -> Tuple[Dict, int]:
+        customer_json = request.get_json()
+        customer_data = customer_schema.load(customer_json)
+
         try:
             customer = CustomerModel.find_by_id(account_id)
         except:
             return {"message": SERVER_ERROR}, 500
 
-        if customer is not None:
+        if customer:
             try:
+                customer.fname = customer_data.fname
+                customer.lname = customer_data.lname
+                customer.address = customer_data.address
+                customer.email = customer_data.email
+                customer.tel_num = customer_data.tel_num
+                customer.mobile_num = customer_data.mobile_num
+                customer.service_type = customer_data.service_type
+                customer.comments = customer_data.comments
+
                 customer.save_to_db()
                 return customer_schema.dump(customer), 200
             except:
