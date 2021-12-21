@@ -102,15 +102,15 @@ class UserLogin(Resource):
     @classmethod
     def post(cls) -> Tuple[Dict, int]:
         user_json = request.get_json()
-        user_data = user_schema.load(user_json)
+        # user_data = user_schema.load(user_json)
 
-        user = UserModel.find_by_username(user_data.user_name)
+        user = UserModel.find_by_username(user_json["user_name"])
 
-        if user and safe_str_cmp(user.password, user_data.password):
+        if user and safe_str_cmp(user.password, user_json["password"]):
             access_token = create_access_token(identity=user.user_id, fresh=True)
             refresh_token = create_refresh_token(user.user_id)
 
-            return {"access_token": access_token, "refresh_toke": refresh_token}, 200
+            return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
         return {"message": INCORRECT_CREDENTIALS}, 401
 
