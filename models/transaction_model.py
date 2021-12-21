@@ -45,7 +45,9 @@ class TransactionModel(db.Model):
     customers = db.relationship("CustomerModel", back_populates="transaction")
     users = db.relationship("UserModel", back_populates="transaction")
 
-    __table_args__ = (db.Index("vector_idx", __ts_vector__, postgresql_using="gin"),)
+    __table_args__ = (
+        db.Index("trans_vector_idx", __ts_vector__, postgresql_using="gin"),
+    )
 
     def save_to_db(self):
         db.session.add(self)
@@ -60,7 +62,7 @@ class TransactionModel(db.Model):
         return cls.query.filter_by(transaction_id=transaction_id).first()
 
     @classmethod
-    def get_all_transactions(cls) -> List[TransactionModel]:
+    def get_all(cls) -> List[TransactionModel]:
         return cls.query.order_by(db.desc(cls.date_entered)).all()
 
     @classmethod

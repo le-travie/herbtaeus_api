@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple, Union
 from flask_jwt_extended.utils import get_jwt, get_jwt_identity
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
 from werkzeug.security import safe_str_cmp
@@ -26,7 +26,7 @@ class UserRegistration(Resource):
         user_json = request.get_json()
         user: UserModel = user_schema.load(user_json)
 
-        if UserModel.find_by_username(user.user_name) is not None:
+        if UserModel.find_by_username(user.user_name):
             return {"message": DUPLICATION_ERROR.format(user.user_name)}, 400
 
         try:
@@ -47,6 +47,22 @@ class User(Resource):
         return user_schema.dump(user)
 
     @classmethod
+    def put(cls, user_id: int) -> Tuple[Dict, int]:
+        try:
+            user = UserModel.find_by_id(user_id)
+        except:
+            return {"message": SERVER_ERROR}, 500
+
+        if user:
+            try:
+                user.save_to_db()
+                return user_schema.dump(user), 200
+            except:
+                return {"message": SERVER_ERROR}, 500
+
+        return {"message": USER_NOT_FOUND}, 404
+
+    @classmethod
     def delete(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
 
@@ -57,9 +73,20 @@ class User(Resource):
         return {"message": USER_DELETION}, 200
 
 
+class AllUsers(Resource):
+    @classmethod
+    def get_all_users(cls) -> Tuple[Dict, int]:
+        try:
+            users = UserModel.find_all()
+        except:
+            return {"message": SERVER_ERROR}, 500
+
+        return {"users": user_list_schema.dump(users)}, 200
+
+
 class UserSearch(Resource):
     @classmethod
-    def search_users(cls, term: str) -> List[UserSchema]:
+    def search_users(cls, term: str) -> Tuple[Dict, int]:
         try:
             users = UserModel.text_search(term)
         except:
@@ -69,17 +96,6 @@ class UserSearch(Resource):
             return {"users": user_list_schema.dump(users)}, 200
 
         return {"message": USER_NOT_FOUND}, 404
-
-
-class AllUsers(Resource):
-    @classmethod
-    def get_all_users(cls, term: str) -> List[UserSchema]:
-        try:
-            users = UserModel.find_all()
-        except:
-            return {"message": SERVER_ERROR}, 500
-
-        return {"users": user_list_schema.dump(users)}, 200
 
 
 class UserLogin(Resource):

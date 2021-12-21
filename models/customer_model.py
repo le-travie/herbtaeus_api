@@ -32,7 +32,9 @@ class CustomerModel(db.Model):
 
     transaction = db.relationship("TransactionModel")
 
-    __table_args__ = (db.Index("vector_idx", __ts_vector__, postgresql_using="gin"),)
+    __table_args__ = (
+        db.Index("customer_vector_idx", __ts_vector__, postgresql_using="gin"),
+    )
 
     def save_to_db(self):
         db.session.add(self)

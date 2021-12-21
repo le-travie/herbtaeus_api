@@ -3,6 +3,7 @@ from typing import List
 from db import db
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.types import TypeDecorator
+from .transaction_model import *
 
 
 class TsVector(TypeDecorator):
