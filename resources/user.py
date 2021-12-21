@@ -75,7 +75,7 @@ class User(Resource):
 
 class AllUsers(Resource):
     @classmethod
-    def get_all_users(cls) -> Tuple[Dict, int]:
+    def get(cls) -> Tuple[Dict, int]:
         try:
             users = UserModel.find_all()
         except:
@@ -86,7 +86,7 @@ class AllUsers(Resource):
 
 class UserSearch(Resource):
     @classmethod
-    def search_users(cls, term: str) -> Tuple[Dict, int]:
+    def get(cls, term: str) -> Tuple[Dict, int]:
         try:
             users = UserModel.text_search(term)
         except:

@@ -56,6 +56,6 @@ class UserModel(db.Model):
     def text_search(cls, term: str) -> List[UserModel]:
         return (
             cls.query.filter(cls.__ts_vector__.match(f"{term}:*"))
-            .order_by(cls.account_id)
+            .order_by(cls.user_id)
             .all()
         )
