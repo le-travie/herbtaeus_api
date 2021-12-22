@@ -1,14 +1,15 @@
 from flask_jwt_extended import jwt_required, get_jwt
 from flask_jwt_extended.utils import get_jwt_identity
-from flask import request
+from flask import json, request
 from flask_restful import Resource
 from typing import Dict, Tuple
+
+from sqlalchemy.orm import query
 from models.transaction_model import TransactionModel
 from schemas.transaction_schema import TransactionSchema
 
-from flask_apispec import marshal_with
+from flask_apispec import marshal_with, doc, use_kwargs
 from flask_apispec import MethodResource
-from flask_apispec.annotations import doc
 
 INSERT_ERROR = "An error occured while adding the transactiion."
 NOT_FOUND = "Could not find the transaction(s)."
@@ -19,28 +20,26 @@ transaction_schema = TransactionSchema()
 transaction_list = TransactionSchema(many=True)
 
 
-class NewTransaction(MethodResource, Resource):
-    @classmethod
+class NewTransaction(Resource, MethodResource):
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_schema)
-    def post(cls) -> Tuple[Dict, int]:
+    @use_kwargs(transaction_schema, location=("json"), apply=False)
+    @marshal_with(transaction_schema, code=201, apply=False)
+    def post(self) -> Tuple[Dict, int]:
         transaction_json = request.get_json()
 
         try:
             transaction: TransactionModel = transaction_schema.load(transaction_json)
             transaction.save_to_db()
-        except Exception as err:
-            return err
-            # return {"message": SERVER_ERROR}, 500
+        except:
+            return {"message": SERVER_ERROR}, 500
 
         return transaction_schema.dump(transaction), 201
 
 
-class Transaction(MethodResource, Resource):
-    @classmethod
+class Transaction(Resource, MethodResource):
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_schema)
-    def get(cls, transaction_id: int) -> Tuple[Dict, int]:
+    @marshal_with(transaction_schema, apply=False)
+    def get(self, transaction_id: int) -> Tuple[Dict, int]:
         try:
             transaction = TransactionModel.find_by_id(transaction_id)
         except:
@@ -51,10 +50,10 @@ class Transaction(MethodResource, Resource):
 
         return {"message": NOT_FOUND}, 404
 
-    @classmethod
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_schema)
-    def put(cls, transaction_id: int) -> Tuple[Dict, int]:
+    @use_kwargs(transaction_schema, location=("json"), apply=False)
+    @marshal_with(transaction_schema, code=200, apply=False)
+    def put(self, transaction_id: int) -> Tuple[Dict, int]:
         json_data = request.get_json()
         transaction_data = transaction_schema.load(json_data)
         try:
@@ -83,10 +82,9 @@ class Transaction(MethodResource, Resource):
 
         return {"message": NOT_FOUND}, 404
 
-    @classmethod
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_schema)
-    def delete(cls, transaction_id: int):
+    @marshal_with(transaction_schema, code=200, apply=False)
+    def delete(self, transaction_id: int):
         try:
             transaction = TransactionModel.find_by_id(transaction_id)
         except:
@@ -102,12 +100,11 @@ class Transaction(MethodResource, Resource):
         return {"message": NOT_FOUND}, 404
 
 
-class TransactionList(MethodResource, Resource):
-    @classmethod
+class TransactionList(Resource, MethodResource):
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_list)
+    @marshal_with(transaction_list, code=200, apply=False)
     # @jwt_required()
-    def get(cls) -> Tuple[Dict, int]:
+    def get(self) -> Tuple[Dict, int]:
         try:
             transactions = TransactionModel.get_all()
         except:
@@ -116,12 +113,11 @@ class TransactionList(MethodResource, Resource):
         return {"transactions": transaction_list.dump(transactions)}, 200
 
 
-class TransactionSearch(MethodResource, Resource):
-    @classmethod
+class TransactionSearch(Resource, MethodResource):
     @doc(tags=["Transaction"])
-    @marshal_with(transaction_list)
+    @marshal_with(transaction_list, code=200, apply=False)
     # @jwt_required()
-    def get(cls, term: str) -> Tuple[Dict, int]:
+    def get(self, term: str) -> Tuple[Dict, int]:
         try:
             results = TransactionModel.text_search(term)
         except:
