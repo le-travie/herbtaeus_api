@@ -8,6 +8,7 @@ from schemas.transaction_schema import TransactionSchema
 
 from flask_apispec import marshal_with
 from flask_apispec import MethodResource
+from flask_apispec.annotations import doc
 
 INSERT_ERROR = "An error occured while adding the transactiion."
 NOT_FOUND = "Could not find the transaction(s)."
@@ -20,6 +21,7 @@ transaction_list = TransactionSchema(many=True)
 
 class NewTransaction(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Transaction"])
     @marshal_with(transaction_schema)
     def post(cls) -> Tuple[Dict, int]:
         transaction_json = request.get_json()
@@ -36,6 +38,7 @@ class NewTransaction(MethodResource, Resource):
 
 class Transaction(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Transaction"])
     @marshal_with(transaction_schema)
     def get(cls, transaction_id: int) -> Tuple[Dict, int]:
         try:
@@ -49,6 +52,8 @@ class Transaction(MethodResource, Resource):
         return {"message": NOT_FOUND}, 404
 
     @classmethod
+    @doc(tags=["Transaction"])
+    @marshal_with(transaction_schema)
     def put(cls, transaction_id: int) -> Tuple[Dict, int]:
         json_data = request.get_json()
         transaction_data = transaction_schema.load(json_data)
@@ -79,6 +84,8 @@ class Transaction(MethodResource, Resource):
         return {"message": NOT_FOUND}, 404
 
     @classmethod
+    @doc(tags=["Transaction"])
+    @marshal_with(transaction_schema)
     def delete(cls, transaction_id: int):
         try:
             transaction = TransactionModel.find_by_id(transaction_id)
@@ -97,6 +104,7 @@ class Transaction(MethodResource, Resource):
 
 class TransactionList(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Transaction"])
     @marshal_with(transaction_list)
     # @jwt_required()
     def get(cls) -> Tuple[Dict, int]:
@@ -110,6 +118,7 @@ class TransactionList(MethodResource, Resource):
 
 class TransactionSearch(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Transaction"])
     @marshal_with(transaction_list)
     # @jwt_required()
     def get(cls, term: str) -> Tuple[Dict, int]:

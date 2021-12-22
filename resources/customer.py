@@ -7,6 +7,7 @@ from typing import Dict, Tuple
 
 from flask_apispec import marshal_with
 from flask_apispec import MethodResource
+from flask_apispec.annotations import doc
 
 INSERT_ERROR = "An error occured while adding the customer."
 CUSTOMER_NOT_FOUND = "Could not find customer(s)."
@@ -19,6 +20,7 @@ customer_list_schema = CustomerSchema(many=True)
 
 class NewCustomer(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_schema)
     def post(cls) -> Tuple[Dict, int]:
         customer_json = request.get_json()
@@ -34,6 +36,7 @@ class NewCustomer(MethodResource, Resource):
 
 class Customer(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_schema)
     def get(cls, account_id: int) -> Tuple[Dict, int]:
         try:
@@ -47,6 +50,7 @@ class Customer(MethodResource, Resource):
         return {"message": CUSTOMER_NOT_FOUND}, 404
 
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_schema)
     def put(cls, account_id: int) -> Tuple[Dict, int]:
         customer_json = request.get_json()
@@ -76,6 +80,7 @@ class Customer(MethodResource, Resource):
         return {"message": CUSTOMER_NOT_FOUND}, 404
 
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_schema)
     def delete(cls, account_id: int):
         customer = CustomerModel.find_by_id(account_id)
@@ -92,6 +97,7 @@ class Customer(MethodResource, Resource):
 
 class AllCustomers(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_list_schema)
     def get(cls) -> Tuple[Dict, int]:
         try:
@@ -104,6 +110,7 @@ class AllCustomers(MethodResource, Resource):
 
 class CustomerSearch(MethodResource, Resource):
     @classmethod
+    @doc(tags=["Customer"])
     @marshal_with(customer_list_schema)
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:

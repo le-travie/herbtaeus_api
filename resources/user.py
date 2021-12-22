@@ -1,4 +1,3 @@
-import re
 from typing import Dict, Tuple, Union
 from flask_jwt_extended.utils import get_jwt, get_jwt_identity
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
@@ -9,6 +8,7 @@ from common.blocklist import BLOCKLIST
 from models.user_model import UserModel
 from schemas.user_schema import UserSchema
 
+from flask_apispec.annotations import doc
 from flask_apispec import marshal_with
 from flask_apispec import MethodResource
 
@@ -26,6 +26,7 @@ user_list_schema = UserSchema(many=True)
 
 class UserRegistration(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_schema)
     def post(cls) -> Tuple[Dict, int]:
         user_json = request.get_json()
@@ -43,6 +44,7 @@ class UserRegistration(MethodResource, Resource):
 
 class User(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_schema)
     def get(cls, user_id: int) -> Union[Dict, Tuple[Dict, int]]:
         user = UserModel.find_by_id(user_id)
@@ -53,6 +55,7 @@ class User(MethodResource, Resource):
         return user_schema.dump(user)
 
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_schema)
     def put(cls, user_id: int) -> Tuple[Dict, int]:
         user_json = request.get_json()
@@ -78,6 +81,7 @@ class User(MethodResource, Resource):
         return {"message": USER_NOT_FOUND}, 404
 
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_schema)
     def delete(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
@@ -91,6 +95,7 @@ class User(MethodResource, Resource):
 
 class AllUsers(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_list_schema)
     def get(cls) -> Tuple[Dict, int]:
         try:
@@ -103,6 +108,7 @@ class AllUsers(MethodResource, Resource):
 
 class UserSearch(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User"])
     @marshal_with(user_list_schema)
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:
@@ -118,6 +124,7 @@ class UserSearch(MethodResource, Resource):
 
 class UserLogin(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User Authentication"])
     @marshal_with(user_schema)
     def post(cls) -> Tuple[Dict, int]:
         user_json = request.get_json()
@@ -136,6 +143,7 @@ class UserLogin(MethodResource, Resource):
 
 class UserLogout(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User Authentication"])
     @marshal_with(user_schema)
     @jwt_required()
     def post(cls) -> Tuple[Dict, int]:
@@ -147,6 +155,7 @@ class UserLogout(MethodResource, Resource):
 
 class TokenRefresh(MethodResource, Resource):
     @classmethod
+    @doc(tags=["User Authentication"])
     @marshal_with(user_schema)
     @jwt_required(refresh=True)
     def post(cls) -> Tuple[Dict, int]:
