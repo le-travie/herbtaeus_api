@@ -26,12 +26,29 @@ from resources.transaction import (
     NewTransaction,
 )
 
+from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
+from flask_apispec.extension import FlaskApiSpec
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
+app.config.update(
+    {
+        "APISPEC_SPEC": APISpec(
+            title="Payment Tracking API",
+            version="v1.0",
+            plugins=[MarshmallowPlugin()],
+            openapi_version="2.0.0",
+        ),
+        "APISPEC_SWAGGER_URL": "/swagger/",
+        "APISPEC_SWAGGER_UI_URL": "/swagger-ui/",
+    }
+)
 app.secret_key = urandom(24)
 api = Api(app)
+docs = FlaskApiSpec(app)
 
 jwt = JWTManager(app)
 
@@ -129,6 +146,22 @@ api.add_resource(NewTransaction, "/transaction/new")
 api.add_resource(Transaction, "/transaction/<int:transaction_id>")
 api.add_resource(TransactionList, "/transactions")
 api.add_resource(TransactionSearch, "/transactions/search/<string:term>")
+
+docs.register(User)
+docs.register(UserRegistration)
+docs.register(UserLogin)
+docs.register(UserLogout)
+docs.register(UserSearch)
+docs.register(AllUsers)
+docs.register(TokenRefresh)
+docs.register(Customer)
+docs.register(AllCustomers)
+docs.register(NewCustomer)
+docs.register(CustomerSearch)
+docs.register(NewTransaction)
+docs.register(Transaction)
+docs.register(TransactionList)
+docs.register(TransactionSearch)
 
 if __name__ == "__main__":
     db.init_app(app)

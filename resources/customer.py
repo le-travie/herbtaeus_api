@@ -5,6 +5,9 @@ from models.customer_model import CustomerModel
 from schemas.customer_schema import CustomerSchema
 from typing import Dict, Tuple
 
+from flask_apispec import marshal_with
+from flask_apispec import MethodResource
+
 INSERT_ERROR = "An error occured while adding the customer."
 CUSTOMER_NOT_FOUND = "Could not find customer(s)."
 CUSTOMER_DELETED = "Customer account deleted."
@@ -14,8 +17,9 @@ customer_schema = CustomerSchema()
 customer_list_schema = CustomerSchema(many=True)
 
 
-class NewCustomer(Resource):
+class NewCustomer(MethodResource, Resource):
     @classmethod
+    @marshal_with(customer_schema)
     def post(cls) -> Tuple[Dict, int]:
         customer_json = request.get_json()
         customer: CustomerModel = customer_schema.load(customer_json)
@@ -28,8 +32,9 @@ class NewCustomer(Resource):
         return customer_schema.dump(customer), 201
 
 
-class Customer(Resource):
+class Customer(MethodResource, Resource):
     @classmethod
+    @marshal_with(customer_schema)
     def get(cls, account_id: int) -> Tuple[Dict, int]:
         try:
             customer = CustomerModel.find_by_id(account_id)
@@ -42,6 +47,7 @@ class Customer(Resource):
         return {"message": CUSTOMER_NOT_FOUND}, 404
 
     @classmethod
+    @marshal_with(customer_schema)
     def put(cls, account_id: int) -> Tuple[Dict, int]:
         customer_json = request.get_json()
         customer_data = customer_schema.load(customer_json)
@@ -70,6 +76,7 @@ class Customer(Resource):
         return {"message": CUSTOMER_NOT_FOUND}, 404
 
     @classmethod
+    @marshal_with(customer_schema)
     def delete(cls, account_id: int):
         customer = CustomerModel.find_by_id(account_id)
         if customer:
@@ -83,8 +90,9 @@ class Customer(Resource):
             return {"message": CUSTOMER_NOT_FOUND}, 404
 
 
-class AllCustomers(Resource):
+class AllCustomers(MethodResource, Resource):
     @classmethod
+    @marshal_with(customer_list_schema)
     def get(cls) -> Tuple[Dict, int]:
         try:
             customers = CustomerModel.find_all()
@@ -94,8 +102,9 @@ class AllCustomers(Resource):
         return {"customers": customer_list_schema.dump(customers)}, 200
 
 
-class CustomerSearch(Resource):
+class CustomerSearch(MethodResource, Resource):
     @classmethod
+    @marshal_with(customer_list_schema)
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:
             results = CustomerModel.text_search(term)

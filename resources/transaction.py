@@ -6,6 +6,9 @@ from typing import Dict, Tuple
 from models.transaction_model import TransactionModel
 from schemas.transaction_schema import TransactionSchema
 
+from flask_apispec import marshal_with
+from flask_apispec import MethodResource
+
 INSERT_ERROR = "An error occured while adding the transactiion."
 NOT_FOUND = "Could not find the transaction(s)."
 DELETION = "Transaction entry successfully deleted."
@@ -15,8 +18,9 @@ transaction_schema = TransactionSchema()
 transaction_list = TransactionSchema(many=True)
 
 
-class NewTransaction(Resource):
+class NewTransaction(MethodResource, Resource):
     @classmethod
+    @marshal_with(transaction_schema)
     def post(cls) -> Tuple[Dict, int]:
         transaction_json = request.get_json()
 
@@ -30,8 +34,9 @@ class NewTransaction(Resource):
         return transaction_schema.dump(transaction), 201
 
 
-class Transaction(Resource):
+class Transaction(MethodResource, Resource):
     @classmethod
+    @marshal_with(transaction_schema)
     def get(cls, transaction_id: int) -> Tuple[Dict, int]:
         try:
             transaction = TransactionModel.find_by_id(transaction_id)
@@ -90,8 +95,9 @@ class Transaction(Resource):
         return {"message": NOT_FOUND}, 404
 
 
-class TransactionList(Resource):
+class TransactionList(MethodResource, Resource):
     @classmethod
+    @marshal_with(transaction_list)
     # @jwt_required()
     def get(cls) -> Tuple[Dict, int]:
         try:
@@ -102,8 +108,9 @@ class TransactionList(Resource):
         return {"transactions": transaction_list.dump(transactions)}, 200
 
 
-class TransactionSearch(Resource):
+class TransactionSearch(MethodResource, Resource):
     @classmethod
+    @marshal_with(transaction_list)
     # @jwt_required()
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:

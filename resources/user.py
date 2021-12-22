@@ -9,6 +9,9 @@ from common.blocklist import BLOCKLIST
 from models.user_model import UserModel
 from schemas.user_schema import UserSchema
 
+from flask_apispec import marshal_with
+from flask_apispec import MethodResource
+
 DUPLICATION_ERROR = "Username '{}', already exists."
 USER_CREATED = "User '{}', created successfully."
 USER_NOT_FOUND = "User(s) not found."
@@ -21,8 +24,9 @@ user_schema = UserSchema()
 user_list_schema = UserSchema(many=True)
 
 
-class UserRegistration(Resource):
+class UserRegistration(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_schema)
     def post(cls) -> Tuple[Dict, int]:
         user_json = request.get_json()
         user: UserModel = user_schema.load(user_json)
@@ -37,8 +41,9 @@ class UserRegistration(Resource):
             return {"message": SERVER_ERROR}, 500
 
 
-class User(Resource):
+class User(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_schema)
     def get(cls, user_id: int) -> Union[Dict, Tuple[Dict, int]]:
         user = UserModel.find_by_id(user_id)
 
@@ -48,6 +53,7 @@ class User(Resource):
         return user_schema.dump(user)
 
     @classmethod
+    @marshal_with(user_schema)
     def put(cls, user_id: int) -> Tuple[Dict, int]:
         user_json = request.get_json()
         user_data = user_schema.load(user_json)
@@ -72,6 +78,7 @@ class User(Resource):
         return {"message": USER_NOT_FOUND}, 404
 
     @classmethod
+    @marshal_with(user_schema)
     def delete(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
 
@@ -82,8 +89,9 @@ class User(Resource):
         return {"message": USER_DELETION}, 200
 
 
-class AllUsers(Resource):
+class AllUsers(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_list_schema)
     def get(cls) -> Tuple[Dict, int]:
         try:
             users = UserModel.find_all()
@@ -93,8 +101,9 @@ class AllUsers(Resource):
         return {"users": user_list_schema.dump(users)}, 200
 
 
-class UserSearch(Resource):
+class UserSearch(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_list_schema)
     def get(cls, term: str) -> Tuple[Dict, int]:
         try:
             users = UserModel.text_search(term)
@@ -107,8 +116,9 @@ class UserSearch(Resource):
         return {"message": USER_NOT_FOUND}, 404
 
 
-class UserLogin(Resource):
+class UserLogin(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_schema)
     def post(cls) -> Tuple[Dict, int]:
         user_json = request.get_json()
         # user_data = user_schema.load(user_json)
@@ -124,8 +134,9 @@ class UserLogin(Resource):
         return {"message": INCORRECT_CREDENTIALS}, 401
 
 
-class UserLogout(Resource):
+class UserLogout(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_schema)
     @jwt_required()
     def post(cls) -> Tuple[Dict, int]:
         jti = get_jwt()["jti"]
@@ -134,8 +145,9 @@ class UserLogout(Resource):
         return {"message": LOG_OUT}, 200
 
 
-class TokenRefresh(Resource):
+class TokenRefresh(MethodResource, Resource):
     @classmethod
+    @marshal_with(user_schema)
     @jwt_required(refresh=True)
     def post(cls) -> Tuple[Dict, int]:
         current_user = get_jwt_identity()
