@@ -17,7 +17,7 @@ PORT="The port used by postgres."
 # Usage  
 Once the database is setup and your .env file has all the information in the above format you may run *app.py*.  
 
-Find documentation at http://localhost/swagger-ui
+Find documentation at http://localhost:5000/swagger-ui
 
 
 
