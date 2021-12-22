@@ -16,15 +16,9 @@ PORT="The port used by postgres."
   
 # Usage  
 Once the database is setup and your .env file has all the information in the above format you may run *app.py*.  
-Current endpoints are as follows:  
-	1. /register - register a new user;  
-	2. /user/xx - replace xx with integer;  
-	3. /login - user login  
-	4. /logout;  
-	5. /refresh;  
-	6. /users;  
-	7. /user/search/xyz - where xyz is the search value/term;  
+
+Find documentation at http://localhost/swagger-ui
 
 
-# To do:  
-Add documentation page using swagger or similar.
+
+
