@@ -7,6 +7,9 @@ from flask import request
 from common.blocklist import BLOCKLIST
 from models.user_model import UserModel
 from schemas.user_schema import UserSchema, LoginSchema
+import bcrypt
+
+# from common.error_logger import logger
 
 from flask_apispec.annotations import doc, use_kwargs
 from flask_apispec import marshal_with
@@ -33,6 +36,9 @@ class UserRegistration(MethodResource, Resource):
     def post(self) -> Tuple[Dict, int]:
         user_json = request.get_json()
         user: UserModel = user_schema.load(user_json)
+
+        hashed = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
+        user.password = hashed.decode("ascii")
 
         if UserModel.find_by_username(user.user_name):
             return {"message": DUPLICATION_ERROR.format(user.user_name)}, 400
@@ -71,7 +77,6 @@ class User(Resource, MethodResource):
                 user.user_name = user_data.user_name
                 user.fname = user_data.fname
                 user.lname = user_data.lname
-                user.password = user_data.password
                 user.role = user_data.role
 
                 user.save_to_db()
@@ -126,10 +131,13 @@ class UserLogin(Resource, MethodResource):
     @marshal_with(login_schema, apply=False)
     def post(self) -> Tuple[Dict, int]:
         user_json = request.get_json()
+        password = user_json["password"]
 
         user = UserModel.find_by_username(user_json["user_name"])
 
-        if user and safe_str_cmp(user.password, user_json["password"]):
+        if user and bcrypt.checkpw(
+            password.encode("utf-8"), user.password.encode("utf-8")
+        ):
             access_token = create_access_token(identity=user.user_id, fresh=True)
             refresh_token = create_refresh_token(user.user_id)
 
@@ -157,3 +165,27 @@ class TokenRefresh(Resource, MethodResource):
         current_user = get_jwt_identity()
         new_token = create_access_token(identity=current_user, fresh=False)
         return {"access_token": new_token}, 200
+
+
+class UpdatePassword(Resource):
+    def put(self, user_id: int) -> Tuple[Dict, int]:
+        user_json = request.get_json()
+        user_data = user_schema.load(user_json)
+
+        try:
+            user = UserModel.find_by_id(user_id)
+
+            if user:
+                new_password = user_data.password.encode("utf-8")
+                user.password = bcrypt.hashpw(new_password, bcrypt.gensalt()).decode(
+                    "ascii"
+                )
+
+                user.save_to_db()
+                return user_schema.dump(user), 200
+            else:
+                return {"message": USER_NOT_FOUND}, 404
+
+        except Exception as err:
+            # logger.error(err, exc_info=True)
+            return {"message": SERVER_ERROR}, 500

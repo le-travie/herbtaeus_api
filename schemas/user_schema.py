@@ -1,10 +1,9 @@
 from marshmallow import fields, Schema
-from sqlalchemy.orm import load_only
-from ma import ma
+from common.marshal import marshy
 from models.user_model import UserModel
 
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
+class UserSchema(marshy.SQLAlchemyAutoSchema):
     class Meta:
         model = UserModel
         load_only = ("password",)

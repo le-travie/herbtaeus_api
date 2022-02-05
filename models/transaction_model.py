@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 
-from db import db
+from common.db import db
 from .user_model import *
 from .customer_model import *
 from datetime import datetime

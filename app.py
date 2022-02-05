@@ -1,12 +1,13 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-from db import db
-from ma import ma
-from common.blocklist import BLOCKLIST
 from marshmallow import ValidationError
-from common.db_connector import URL
-from os import urandom
+from flask_apispec.extension import FlaskApiSpec
+
+from common.blocklist import BLOCKLIST
+from common.db import db
+from common.marshal import marshy
+from dotenv import load_dotenv
 
 from resources.user import (
     UserRegistration,
@@ -16,6 +17,7 @@ from resources.user import (
     UserLogin,
     UserLogout,
     TokenRefresh,
+    UpdatePassword,
 )
 
 from resources.customer import Customer, AllCustomers, CustomerSearch, NewCustomer
@@ -26,31 +28,15 @@ from resources.transaction import (
     NewTransaction,
 )
 
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
-from flask_apispec.extension import FlaskApiSpec
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = URL
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["PROPAGATE_EXCEPTIONS"] = True
-app.config.update(
-    {
-        "APISPEC_SPEC": APISpec(
-            title="Payment Tracking API",
-            version="v1.0",
-            plugins=[MarshmallowPlugin()],
-            openapi_version="2.0.0",
-        ),
-        "APISPEC_SWAGGER_URL": "/swagger/",
-        "APISPEC_SWAGGER_UI_URL": "/swagger-ui/",
-    }
-)
-app.secret_key = urandom(24)
+load_dotenv(".env", verbose=True)
+app.config.from_object("default_config")
+app.config.from_envvar("APPLICATON_SETTINGS")
 api = Api(app)
+jwt = JWTManager(app)
 docs = FlaskApiSpec(app)
 
-jwt = JWTManager(app)
 
 # do noi use. Needs fixin'
 # @jwt.additional_claims_loader
@@ -133,6 +119,7 @@ def handle_marshmallow_validation(err):
 
 api.add_resource(UserRegistration, "/register")
 api.add_resource(User, "/user/<int:user_id>")
+api.add_resource(UpdatePassword, "/user/change_password/<int:user_id>")
 api.add_resource(UserLogin, "/login")
 api.add_resource(UserLogout, "/logout")
 api.add_resource(TokenRefresh, "/refresh")
@@ -163,7 +150,12 @@ docs.register(Transaction)
 docs.register(TransactionList)
 docs.register(TransactionSearch)
 
-if __name__ == "__main__":
+
+def main() -> None:
     db.init_app(app)
-    ma.init_app(app)
-    app.run(port=5000, debug=True)
+    marshy.init_app(app)
+    app.run(port=5000)
+
+
+if __name__ == "__main__":
+    main()

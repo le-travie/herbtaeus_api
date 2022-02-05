@@ -1,10 +1,9 @@
 from flask_sqlalchemy import model
-from marshmallow_sqlalchemy import load_instance_mixin
-from ma import ma
+from common.marshal import marshy
 from models.customer_model import CustomerModel
 
 
-class CustomerSchema(ma.SQLAlchemyAutoSchema):
+class CustomerSchema(marshy.SQLAlchemyAutoSchema):
     class Meta:
         model = CustomerModel
         dump_only = ("account_id",)

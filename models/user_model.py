@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List
-from db import db
+from common.db import db
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.types import TypeDecorator
 from .transaction_model import *
